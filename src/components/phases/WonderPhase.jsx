@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { narrate, stopNarration } from '../../utils/audio';
+import { wonderIntro, wonderNarration } from '../../utils/narration';
 
 const WONDER_QUESTIONS = [
   {
@@ -31,6 +33,19 @@ export default function WonderPhase({ onComplete, audioEnabled }) {
   const [wonder] = useState(() => WONDER_QUESTIONS[Math.floor(Math.random() * WONDER_QUESTIONS.length)]);
   const [stage, setStage] = useState(0);
   const [particles, setParticles] = useState([]);
+
+  useEffect(() => {
+    if (!audioEnabled) {
+      stopNarration();
+      return;
+    }
+    const playNarrative = async () => {
+      await narrate(wonderIntro(), true);
+      await narrate(wonderNarration(wonder), false);
+    };
+    playNarrative();
+    return () => stopNarration();
+  }, [wonder, audioEnabled]);
 
   useEffect(() => {
     const p = Array.from({ length: 22 }, (_, i) => ({

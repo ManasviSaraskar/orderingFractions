@@ -7,7 +7,10 @@ import TrueFalseQuestion from '../practice/TrueFalseQuestion';
 import DragOrderQuestion from '../practice/DragOrderQuestion';
 import NumberLineSimulation from '../simulations/NumberLineSimulation';
 
-export default function PracticeLevelUI({ level, onComplete }) {
+import { narrate, stopNarration } from '../../utils/audio';
+import { questionNarration } from '../../utils/narration';
+
+export default function PracticeLevelUI({ level, onComplete, audioEnabled }) {
   const { dispatch } = useGame();
   const { playCorrect, playWrong } = useAudio();
   
@@ -16,6 +19,15 @@ export default function PracticeLevelUI({ level, onComplete }) {
   const [attempts, setAttempts] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    if (questions[currentIndex] && audioEnabled) {
+      narrate(questionNarration(questions[currentIndex].questionText), true);
+    } else {
+      stopNarration();
+    }
+    return () => stopNarration();
+  }, [currentIndex, questions, audioEnabled]);
   
   // Gamification state
   const [streak, setStreak] = useState(0);

@@ -43,6 +43,9 @@ const STORY_SLIDES = [
   },
 ];
 
+import { narrate, stopNarration } from '../../utils/audio';
+import { storySlideNarration } from '../../utils/narration';
+
 export default function StoryPhase({ onComplete, audioEnabled }) {
   const [slide, setSlide] = useState(0);
   const [anim, setAnim] = useState(false);
@@ -52,6 +55,15 @@ export default function StoryPhase({ onComplete, audioEnabled }) {
   const s = STORY_SLIDES[slide];
   const isLast = slide === STORY_SLIDES.length - 1;
   const pct = ((slide + 1) / STORY_SLIDES.length) * 100;
+
+  useEffect(() => {
+    if (audioEnabled) {
+      narrate(storySlideNarration(slide, s.text), true);
+    } else {
+      stopNarration();
+    }
+    return () => stopNarration();
+  }, [slide, audioEnabled, s.text]);
 
   useEffect(() => {
     setTextVis(false); setHlVis(false);

@@ -25,6 +25,9 @@ const CONFIDENCE_LEVELS = [
   { emoji: '😐', label: "I'm still learning", color: '#42a5f5' },
 ];
 
+import { narrate, stopNarration } from '../../utils/audio';
+import { reflectQuestionNarration, confidenceIntro, victoryNarration } from '../../utils/narration';
+
 export default function ReflectPhase({ stats, onRestart, onGoHome, audioEnabled }) {
   const [step, setStep] = useState(0);
   const [teachIdx, setTeachIdx] = useState(0);
@@ -33,6 +36,24 @@ export default function ReflectPhase({ stats, onRestart, onGoHome, audioEnabled 
   const [confidence, setConfidence] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiPieces, setConfettiPieces] = useState([]);
+
+  useEffect(() => {
+    if (!audioEnabled) {
+      stopNarration();
+      return;
+    }
+    if (step === 0) {
+      const rq = REFLECT_QUESTIONS[teachIdx];
+      if (rq) {
+        narrate(reflectQuestionNarration(rq.q), true);
+      }
+    } else if (step === 1) {
+      narrate(confidenceIntro(), true);
+    } else if (step === 2) {
+      narrate(victoryNarration(), true);
+    }
+    return () => stopNarration();
+  }, [step, teachIdx, audioEnabled]);
 
   const score = stats?.score || 0;
   const xp = score;

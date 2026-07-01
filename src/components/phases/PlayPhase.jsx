@@ -7,10 +7,22 @@ const WORLDS = [
   { id: 3, name: 'Crystal Maze', desc: 'Mixed Fractions', icon: '💎', color: '#3f51b5' },
 ];
 
+import { narrate, stopNarration } from '../../utils/audio';
+import { playIntro } from '../../utils/narration';
+
 export default function PlayPhase({ onComplete, audioEnabled }) {
   const [currentLevel, setCurrentLevel] = useState(null);
   const [completedLevels, setCompletedLevels] = useState([]);
   const [totalXP, setTotalXP] = useState(0);
+
+  useEffect(() => {
+    if (!currentLevel && audioEnabled) {
+      narrate(playIntro(), true);
+    } else {
+      stopNarration();
+    }
+    return () => stopNarration();
+  }, [currentLevel, audioEnabled]);
   
   const handleLevelComplete = (stats) => {
     setCompletedLevels(prev => [...prev, currentLevel]);
@@ -24,7 +36,7 @@ export default function PlayPhase({ onComplete, audioEnabled }) {
   };
 
   if (currentLevel) {
-    return <PracticeLevelUI level={currentLevel} onComplete={handleLevelComplete} />;
+    return <PracticeLevelUI level={currentLevel} onComplete={handleLevelComplete} audioEnabled={audioEnabled} />;
   }
 
   const allDone = completedLevels.length === 3;

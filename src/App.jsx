@@ -89,10 +89,35 @@ function IntroScreen({ onStart }) {
   );
 }
 
+import { useEffect } from 'react';
+import { setAudioEnabled as setEngineAudioEnabled, narrate, stopNarration } from './utils/audio';
+import { introNarration } from './utils/narration';
+
 function AppContent() {
   const [phase, setPhase] = useState('intro');
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [playStats, setPlayStats] = useState(null);
+
+  useEffect(() => {
+    setEngineAudioEnabled(audioEnabled);
+  }, [audioEnabled]);
+
+  useEffect(() => {
+    if (phase === 'intro') {
+      if (audioEnabled) {
+        // We delay slightly to bypass browser autoplay restrictions if it's the very first load
+        const t = setTimeout(() => {
+          narrate(introNarration(), true);
+        }, 500);
+        return () => clearTimeout(t);
+      } else {
+        stopNarration();
+      }
+    }
+    return () => {
+      if (phase === 'intro') stopNarration();
+    };
+  }, [phase, audioEnabled]);
 
   const toggleAudio = useCallback(() => setAudioEnabled(prev => !prev), []);
 
@@ -109,6 +134,7 @@ function AppContent() {
   const phaseIndex = PHASES.indexOf(phase);
   // Show journey bar on all phases except intro
   const showJourney = phase !== 'intro';
+
 
   return (
     <>

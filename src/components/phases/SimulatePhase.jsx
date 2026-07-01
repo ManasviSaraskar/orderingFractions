@@ -9,11 +9,31 @@ const STATIONS = [
   { id: 2, title: 'Mixed Fractions', subtitle: 'Number Line', icon: '📏' },
 ];
 
+import { narrate, stopNarration } from '../../utils/audio';
+import { simulateIntro, simulateStationIntro } from '../../utils/narration';
+
 export default function SimulatePhase({ onComplete, audioEnabled }) {
   const [station, setStation] = useState(0);
   const [stationComplete, setStationComplete] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiPieces, setConfettiPieces] = useState([]);
+
+  useEffect(() => {
+    if (audioEnabled) {
+      const playNarrative = async () => {
+        if (station === 0) {
+          await narrate(simulateIntro(), true);
+          await narrate(simulateStationIntro(station), false);
+        } else {
+          await narrate(simulateStationIntro(station), true);
+        }
+      };
+      playNarrative();
+    } else {
+      stopNarration();
+    }
+    return () => stopNarration();
+  }, [station, audioEnabled]);
 
   useEffect(() => {
     if (showConfetti) {
