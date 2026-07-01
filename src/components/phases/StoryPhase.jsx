@@ -57,10 +57,19 @@ export default function StoryPhase({ onComplete, audioEnabled }) {
   const pct = ((slide + 1) / STORY_SLIDES.length) * 100;
 
   useEffect(() => {
-    if (audioEnabled) {
+    if (!audioEnabled) return;
+    // Delay narration slightly on first slide so that the App-level
+    // stopNarration() (which fires on every phase change) has already
+    // completed before we try to play, preventing the first slide's
+    // audio from being immediately cancelled.
+    const delay = slide === 0 ? 200 : 0;
+    const timer = setTimeout(() => {
       narrate(storySlideNarration(slide, s.text), true);
-    }
-    return () => stopNarration();
+    }, delay);
+    return () => {
+      clearTimeout(timer);
+      stopNarration();
+    };
   }, [slide, audioEnabled, s.text]);
 
   useEffect(() => {
