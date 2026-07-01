@@ -19,20 +19,22 @@ export default function SimulatePhase({ onComplete, audioEnabled }) {
   const [confettiPieces, setConfettiPieces] = useState([]);
 
   useEffect(() => {
-    if (audioEnabled) {
-      const playNarrative = async () => {
-        if (station === 0) {
-          await narrate(simulateIntro(), true);
-          await narrate(simulateStationIntro(station), false);
-        } else {
-          await narrate(simulateStationIntro(station), true);
-        }
-      };
-      playNarrative();
-    } else {
+    if (!audioEnabled) return;
+    let cancelled = false;
+    const playNarrative = async () => {
+      if (station === 0) {
+        await narrate(simulateIntro(), true);
+        if (cancelled) return;
+        await narrate(simulateStationIntro(station), false);
+      } else {
+        await narrate(simulateStationIntro(station), true);
+      }
+    };
+    playNarrative();
+    return () => {
+      cancelled = true;
       stopNarration();
-    }
-    return () => stopNarration();
+    };
   }, [station, audioEnabled]);
 
   useEffect(() => {

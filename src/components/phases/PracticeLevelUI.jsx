@@ -23,9 +23,9 @@ export default function PracticeLevelUI({ level, onComplete, audioEnabled }) {
   useEffect(() => {
     if (questions[currentIndex] && audioEnabled) {
       narrate(questionNarration(questions[currentIndex].questionText), true);
-    } else {
-      stopNarration();
     }
+    // Do NOT call stopNarration() in the else branch — questions[] starts empty
+    // on mount and the else would kill narration before questions load.
     return () => stopNarration();
   }, [currentIndex, questions, audioEnabled]);
   

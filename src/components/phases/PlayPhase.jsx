@@ -18,9 +18,8 @@ export default function PlayPhase({ onComplete, audioEnabled }) {
   useEffect(() => {
     if (!currentLevel && audioEnabled) {
       narrate(playIntro(), true);
-    } else {
-      stopNarration();
     }
+    // Do NOT stop narration in the else: PracticeLevelUI handles its own narration.
     return () => stopNarration();
   }, [currentLevel, audioEnabled]);
   

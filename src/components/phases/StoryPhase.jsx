@@ -59,8 +59,6 @@ export default function StoryPhase({ onComplete, audioEnabled }) {
   useEffect(() => {
     if (audioEnabled) {
       narrate(storySlideNarration(slide, s.text), true);
-    } else {
-      stopNarration();
     }
     return () => stopNarration();
   }, [slide, audioEnabled, s.text]);

@@ -35,16 +35,18 @@ export default function WonderPhase({ onComplete, audioEnabled }) {
   const [particles, setParticles] = useState([]);
 
   useEffect(() => {
-    if (!audioEnabled) {
-      stopNarration();
-      return;
-    }
+    if (!audioEnabled) return;
+    let cancelled = false;
     const playNarrative = async () => {
       await narrate(wonderIntro(), true);
+      if (cancelled) return;
       await narrate(wonderNarration(wonder), false);
     };
     playNarrative();
-    return () => stopNarration();
+    return () => {
+      cancelled = true;
+      stopNarration();
+    };
   }, [wonder, audioEnabled]);
 
   useEffect(() => {

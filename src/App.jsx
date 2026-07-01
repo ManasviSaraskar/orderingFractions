@@ -90,8 +90,7 @@ function IntroScreen({ onStart }) {
 }
 
 import { useEffect } from 'react';
-import { setAudioEnabled as setEngineAudioEnabled, narrate, stopNarration } from './utils/audio';
-import { introNarration } from './utils/narration';
+import { setAudioEnabled as setEngineAudioEnabled, stopNarration } from './utils/audio';
 
 function AppContent() {
   const [phase, setPhase] = useState('intro');
@@ -100,24 +99,14 @@ function AppContent() {
 
   useEffect(() => {
     setEngineAudioEnabled(audioEnabled);
+    if (!audioEnabled) stopNarration();
   }, [audioEnabled]);
 
+  // Stop any lingering narration whenever the phase changes.
+  // Each phase component is responsible for starting its own narration.
   useEffect(() => {
-    if (phase === 'intro') {
-      if (audioEnabled) {
-        // We delay slightly to bypass browser autoplay restrictions if it's the very first load
-        const t = setTimeout(() => {
-          narrate(introNarration(), true);
-        }, 500);
-        return () => clearTimeout(t);
-      } else {
-        stopNarration();
-      }
-    }
-    return () => {
-      if (phase === 'intro') stopNarration();
-    };
-  }, [phase, audioEnabled]);
+    stopNarration();
+  }, [phase]);
 
   const toggleAudio = useCallback(() => setAudioEnabled(prev => !prev), []);
 
