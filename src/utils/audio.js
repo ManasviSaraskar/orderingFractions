@@ -89,28 +89,9 @@ export function stopNarration() {
     currentAudio.pause();
     currentAudio = null;
   }
-  if (window.speechSynthesis) {
-    window.speechSynthesis.cancel();
-  }
 }
 
-// Web Speech API fallback for dynamic synthesis
-function speakFallback(text) {
-  return new Promise((resolve) => {
-    if (!window.speechSynthesis) {
-      resolve();
-      return;
-    }
-    window.speechSynthesis.cancel();
-    // Remove emojis/special characters for speech synthesis
-    const speechText = text.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, '');
-    const utterance = new SpeechSynthesisUtterance(speechText);
-    utterance.rate = 1.0;
-    utterance.onend = () => resolve();
-    utterance.onerror = () => resolve();
-    window.speechSynthesis.speak(utterance);
-  });
-}
+
 
 export async function narrate(segments, force = true) {
   if (!isAudioEnabled) return;
@@ -153,14 +134,11 @@ export async function narrate(segments, force = true) {
           audio.play().catch(reject);
         });
       } else {
-        // Fallback to Web Speech API if no audio file is available
-        await speakFallback(segment.text);
+        // No audio available — skip silently (do not fall back to browser voice)
+        console.warn('No ElevenLabs audio for:', segment.text);
       }
     } catch (err) {
-      console.warn('Playback error, falling back to SpeechSynthesis:', err);
-      if (queueId === activeQueue) {
-        await speakFallback(segment.text);
-      }
+      console.warn('ElevenLabs playback error, skipping segment:', err);
     }
 
     // Brief gap between segments

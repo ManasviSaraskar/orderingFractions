@@ -41,12 +41,13 @@ export function playIntro() {
 }
 
 export function questionNarration(questionText) {
-  // Cleans the text representation for speech mapping if needed
-  let cleanedText = questionText;
-  if (questionText.includes('Is 1/')) {
-    // Standardizes representation to match generation phrases
-    cleanedText = questionText.replace('Is 1/', 'Is 1/').replace('>', '>').replace('<', '<');
-  }
+  // Convert raw comparison symbols to spoken words so the text matches
+  // the pre-generated audioMap entries (e.g. "Is 1/3 > 1/5?" -> "Is 1/3 greater than 1/5?")
+  let cleanedText = questionText
+    .replace(/\s*>\s*/g, ' greater than ')
+    .replace(/\s*<\s*/g, ' less than ')
+    .replace(/\s+/g, ' ')
+    .trim();
   return ask(cleanedText);
 }
 
