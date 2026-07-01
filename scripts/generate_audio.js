@@ -5,23 +5,28 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Helper to load env variables from .env.local
+// Helper to load env variables from .env.local or .env
 function loadEnv() {
-  const envPath = path.resolve(__dirname, '../.env.local');
-  if (fs.existsSync(envPath)) {
-    const content = fs.readFileSync(envPath, 'utf-8');
-    const lines = content.split('\n');
-    for (const line of lines) {
-      const match = line.match(/^\s*([^#=]+)\s*=\s*(.*)$/);
-      if (match) {
-        const key = match[1].trim();
-        let val = match[2].trim();
-        if (val.startsWith('"') && val.endsWith('"')) {
-          val = val.substring(1, val.length - 1);
-        } else if (val.startsWith("'") && val.endsWith("'")) {
-          val = val.substring(1, val.length - 1);
+  const envPaths = [
+    path.resolve(__dirname, '../.env.local'),
+    path.resolve(__dirname, '../.env')
+  ];
+  for (const envPath of envPaths) {
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, 'utf-8');
+      const lines = content.split('\n');
+      for (const line of lines) {
+        const match = line.match(/^\s*([^#=]+)\s*=\s*(.*)$/);
+        if (match) {
+          const key = match[1].trim();
+          let val = match[2].trim();
+          if (val.startsWith('"') && val.endsWith('"')) {
+            val = val.substring(1, val.length - 1);
+          } else if (val.startsWith("'") && val.endsWith("'")) {
+            val = val.substring(1, val.length - 1);
+          }
+          process.env[key] = val;
         }
-        process.env[key] = val;
       }
     }
   }
@@ -121,8 +126,11 @@ async function generate() {
     audioMap[text] = relativePath;
 
     if (fs.existsSync(destPath)) {
-      console.log(`[SKIPPED] "${text}" already exists.`);
-      continue;
+      const stats = fs.statSync(destPath);
+      if (stats.size > 24) {
+        console.log(`[SKIPPED] "${text}" already exists and is not a mock file.`);
+        continue;
+      }
     }
 
     if (!API_KEY) {
