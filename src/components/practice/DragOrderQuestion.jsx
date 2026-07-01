@@ -38,7 +38,8 @@ function SortableFractionToken({ item }) {
     margin: '0 8px',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    touchAction: 'none'
   };
 
   return (

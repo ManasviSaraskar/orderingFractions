@@ -38,7 +38,8 @@ function SortableFractionBar({ item, color }) {
     background: 'var(--bg-card-solid)',
     border: '2px solid rgba(255,255,255,0.2)',
     borderRadius: 'var(--radius-md)',
-    cursor: 'grab'
+    cursor: 'grab',
+    touchAction: 'none'
   };
 
   const widthPct = (item.n / item.d) * 100;

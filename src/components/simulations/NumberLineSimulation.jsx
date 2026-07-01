@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import FractionDisplay from '../ui/FractionDisplay';
 import { useAudio } from '../../context/AudioContext';
 
@@ -28,6 +28,7 @@ export default function NumberLineSimulation({ fractions: rawFractions, onComple
   const [activeToken, setActiveToken] = useState(null);
   const [wrongId, setWrongId] = useState(null);
   const { playCorrect, playWrong } = useAudio();
+  const containerRef = useRef(null);
 
   const handleSnapClick = (snapVal) => {
     if (!activeToken || isComplete) return;
@@ -51,6 +52,36 @@ export default function NumberLineSimulation({ fractions: rawFractions, onComple
     }
   };
 
+  const handleLineClick = (e) => {
+    if (!activeToken || isComplete || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    
+    // The horizontal line is inset by 5% on left and right, so line starts at 5% and ends at 95%
+    const lineLeft = width * 0.05;
+    const lineWidth = width * 0.90;
+    
+    const clickPos = (clickX - lineLeft) / lineWidth;
+    
+    // Clamp between 0 and 1
+    const clampedPos = Math.max(0, Math.min(1, clickPos));
+    
+    // Find the closest snap point
+    let closestSp = SNAP_POINTS[0];
+    let minDiff = Math.abs(clampedPos - closestSp.val);
+    
+    for (let i = 1; i < SNAP_POINTS.length; i++) {
+      const diff = Math.abs(clampedPos - SNAP_POINTS[i].val);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestSp = SNAP_POINTS[i];
+      }
+    }
+    
+    handleSnapClick(closestSp.val);
+  };
+
   const remaining = fractions.filter(f => !placements[f.id]);
 
   return (
@@ -71,26 +102,31 @@ export default function NumberLineSimulation({ fractions: rawFractions, onComple
       </div>
 
       {/* ─── Number Line ─── */}
-      <div style={{
-        position: 'relative', width: '100%', height: '130px', marginBottom: '12px',
-        background: activeToken ? 'rgba(255,193,7,0.05)' : 'rgba(255,255,255,0.04)',
-        border: `2px solid ${activeToken ? 'var(--gold)' : 'rgba(255,255,255,0.1)'}`,
-        borderRadius: 'var(--radius-xl)', transition: 'all 0.3s ease',
-        boxShadow: activeToken ? '0 0 24px rgba(255,193,7,0.12)' : 'none',
-      }}>
+      <div 
+        ref={containerRef}
+        onClick={handleLineClick}
+        style={{
+          position: 'relative', width: '100%', height: '130px', marginBottom: '12px',
+          background: activeToken ? 'rgba(255,193,7,0.05)' : 'rgba(255,255,255,0.04)',
+          border: `2px solid ${activeToken ? 'var(--gold)' : 'rgba(255,255,255,0.1)'}`,
+          borderRadius: 'var(--radius-xl)', transition: 'all 0.3s ease',
+          boxShadow: activeToken ? '0 0 24px rgba(255,193,7,0.12)' : 'none',
+          cursor: activeToken && !isComplete ? 'pointer' : 'default',
+        }}
+      >
         {/* Horizontal bar */}
         <div style={{
           position: 'absolute', top: '56px', left: '5%', right: '5%',
           height: '4px', background: 'rgba(255,255,255,0.6)', borderRadius: '2px',
+          pointerEvents: 'none'
         }}>
           {/* Snap-point buttons */}
           {SNAP_POINTS.map((sp) => {
             const pct = sp.val * 100;
             const isPlaced = Object.values(placements).some(v => Math.abs(v - sp.val) < 0.01);
             return (
-              <button
+              <div
                 key={sp.val}
-                onClick={() => handleSnapClick(sp.val)}
                 style={{
                   position: 'absolute',
                   left: `${pct}%`,
@@ -100,13 +136,13 @@ export default function NumberLineSimulation({ fractions: rawFractions, onComple
                   height: sp.major ? '52px' : '40px',
                   background: 'transparent',
                   border: 'none',
-                  cursor: activeToken && !isComplete ? 'pointer' : 'default',
                   padding: 0,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   zIndex: 4,
+                  pointerEvents: 'none'
                 }}
               >
                 {/* Tick mark */}
@@ -131,7 +167,7 @@ export default function NumberLineSimulation({ fractions: rawFractions, onComple
                     {sp.label}
                   </div>
                 )}
-              </button>
+              </div>
             );
           })}
 
