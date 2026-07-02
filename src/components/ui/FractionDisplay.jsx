@@ -1,25 +1,32 @@
 import React from 'react';
 
 export default function FractionDisplay({ n, d, size = 'md' }) {
-  const sizeClasses = {
-    sm: 'text-xl w-6',
-    md: 'text-3xl w-10',
-    lg: 'text-5xl w-16',
-    xl: 'text-7xl w-24'
-  };
-
-  const gapClasses = {
-    sm: 'gap-0.5',
-    md: 'gap-1',
-    lg: 'gap-2',
-    xl: 'gap-3'
-  };
+  const fontSize = { sm: '1.1rem', md: '1.6rem', lg: '2.4rem', xl: '3.5rem' }[size];
+  const minWidth = { sm: '28px', md: '40px', lg: '60px', xl: '88px' }[size];
+  const barHeight = { sm: '2px', md: '3px', lg: '4px', xl: '5px' }[size];
+  const gap = { sm: '2px', md: '3px', lg: '5px', xl: '7px' }[size];
 
   return (
-    <div className={`inline-flex flex-col items-center justify-center font-mono font-bold leading-none ${gapClasses[size]}`}>
-      <span className={sizeClasses[size] + " text-center"}>{n}</span>
-      <div className={`bg-current w-full ${size === 'sm' ? 'h-0.5' : size === 'md' ? 'h-1' : 'h-2'}`}></div>
-      <span className={sizeClasses[size] + " text-center"}>{d}</span>
+    <div style={{
+      display: 'inline-flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap,
+      fontFamily: 'var(--font-display, monospace)',
+      fontWeight: 'bold',
+      lineHeight: 1,
+      minWidth,
+    }}>
+      <span style={{ fontSize, textAlign: 'center', display: 'block' }}>{n}</span>
+      <div style={{
+        width: '100%',
+        height: barHeight,
+        background: 'currentColor',
+        borderRadius: '2px',
+        minWidth,
+      }} />
+      <span style={{ fontSize, textAlign: 'center', display: 'block' }}>{d}</span>
     </div>
   );
 }

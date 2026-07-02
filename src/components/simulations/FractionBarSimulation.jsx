@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import FractionDisplay from '../ui/FractionDisplay';
 import {
   DndContext,
   closestCenter,
@@ -47,11 +48,11 @@ function SortableFractionBar({ item, color }) {
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div style={{
-        width: '64px', textAlign: 'center', fontFamily: 'var(--font-display)',
-        fontWeight: 'bold', fontSize: '1.5rem', borderRight: '2px solid rgba(255,255,255,0.2)',
+        width: '72px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+        borderRight: '2px solid rgba(255,255,255,0.2)',
         marginRight: '16px', paddingRight: '8px', color: 'white'
       }}>
-        {item.n}/{item.d}
+        <FractionDisplay n={item.n} d={item.d} size="md" />
       </div>
       <div style={{
         flex: 1, background: 'rgba(255,255,255,0.1)', borderRadius: '8px',
