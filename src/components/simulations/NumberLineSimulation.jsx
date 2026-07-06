@@ -213,6 +213,7 @@ export default function NumberLineSimulation({ fractions: rawFractions, onComple
                   background: isWrong
                     ? 'rgba(239,83,80,0.15)'
                     : isActive ? 'rgba(255,193,7,0.12)' : 'var(--bg-card)',
+                  color: 'white',
                   border: `3px solid ${isWrong ? 'var(--red)' : isActive ? 'var(--gold)' : 'rgba(255,255,255,0.2)'}`,
                   borderRadius: '20px', padding: '16px 24px', cursor: 'pointer',
                   transition: 'all 0.2s ease',
